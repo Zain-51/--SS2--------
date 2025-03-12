@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Schedule</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
+    <style>
+        html {
+            scroll-behavior: smooth; /* تفعيل التمرير السلس */
+        }
+    </style>
+</head>
+<body>
+    <p>{{content}}</p>
+    <!-- ✅ شريط التنقل -->
+    <nav class="navbar">
+        <div class="logo">Smart Schedule</div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#objectives">Objectives</a></li>
+            <li><a href="subjects" class="btn">Get Started</a></li>
+            <li><a href="#">Register</a></li>
+            <li><button id="darkModeToggle" class="dark-mode-btn">🌙 Dark Mode</button></li> <!-- زر الوضع الداكن -->
+        </ul>
+    </nav>
+    
+
+    <!-- ✅ قسم الترحيب -->
+    <header class="hero">
+        <h1>Welcome to <span class="highlight">Smart Schedule</span></h1>
+        <p>Simplify your course registration process with our innovative scheduling system.Smart Schedule uses advanced algorithms to generate the best possible timetables based on your preferences and availability.</p>
+        <a href="subjects" class="btn-primary">Get Started</a>
+        <a href="#features" class="btn-secondary">Learn More</a>
+    </header>
+
+    <!-- ✅ قسم المميزات -->
+    <section id="features" class="section">
+        <h2>A better way to manage your courses</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <h3>Automatic Schedule Generation</h3>
+                <p>Generate multiple schedule options based on your preferences.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Visual Schedule Display</h3>
+                <p>View your weekly schedule graphically.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Conflict Resolution</h3>
+                <p>Automatically detect and resolve course conflicts.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Gap Minimization</h3>
+                <p>Prioritize schedules that minimize long gaps between classes.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✅ قسم الأهداف (Our Mission) -->
+    <section id="objectives" class="section light-bg">
+        <h3 class="section-title">OBJECTIVES</h3> <!-- العنوان الصغير -->
+        <h2 class="mission-title">Our Mission</h2> <!-- العنوان الرئيسي -->
+        <p class="mission-description">
+            Smart Schedule aims to enhance the college experience by addressing key challenges in course registration and scheduling.
+        </p>
+
+        <div class="objectives-grid">
+            <div class="objective-item">
+                <h4>Simplifying Registration</h4>
+                <p>To simplify the course registration process for students.</p>
+            </div>
+            <div class="objective-item">
+                <h4>Visual Schedule</h4>
+                <p>To provide a visual weekly schedule for better planning.</p>
+            </div>
+            <div class="objective-item">
+                <h4>Automate Scheduling</h4>
+                <p>To automate schedule generation and conflict management for optimized timetables.</p>
+            </div>
+            <div class="objective-item">
+                <h4>Minimize Gaps</h4>
+                <p>To minimize inefficient gaps between classes.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✅ تذييل الصفحة -->
+    <footer class="footer">
+        <div class="socials">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <p>© 2023 Smart Schedule. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/app.js"></script>
+</body>
+</html>

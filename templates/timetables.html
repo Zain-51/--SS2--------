@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generated Timetables - Smart Schedule</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
+    <!-- ✅ مكتبة تصدير PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <!-- ✅ شريط التنقل (Navbar) -->
+    <nav class="navbar">
+        <div class="logo">Smart Schedule</div>
+        <ul class="nav-links">
+            <li><a href="index#features">Features</a></li>
+            <li><a href="index#objectives">Objectives</a></li>
+            <li><a href="subjects" class="btn">Get Started</a></li>
+            <li><a href="#">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- ✅ عرض الجداول الزمنية -->
+    <section class="timetables-section">
+        <h1>🎉 Congratulations! Multiple Timetables Have Been Generated</h1>
+        <div id="timetables-container" class="grid-container"></div>
+    </section>
+
+    <!-- ✅ أزرار الميزات الإضافية -->
+    <div class="action-buttons">
+        <button class="btn-primary" onclick="exportTimetableAsPDF()">🗂️ Export as PDF</button>
+        <button class="btn-secondary" onclick="shareTimetable()">🔗 Share Timetable</button>
+        <button class="btn-primary" onclick="addToGoogleCalendar()">📅 Add to Google Calendar</button>
+    </div>
+
+    <!-- ✅ تذييل الصفحة (Footer) -->
+    <footer class="footer">
+        <div class="socials">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <p>© 2023 Smart Schedule. All rights reserved.</p>
+    </footer>
+
+    <!-- ✅ ربط ملف JavaScript -->
+    <script src="static/app.js"></script>
+</body>
+</html>

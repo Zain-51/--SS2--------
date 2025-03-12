@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Preferences - Smart Schedule</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
+</head>
+<body>
+
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="logo">Smart Schedule</div>
+        <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#objectives">Objectives</a></li>
+            <li><a href="subjects.html" class="btn">Get Started</a></li>
+            <li><a href="#">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- اختيار التفضيلات -->
+    <section class="preferences-section">
+        <h1>Choose Your Preferences</h1>
+
+        <!-- تفضيل الوقت -->
+        <div class="preference-group">
+            <h3>Time Preference</h3>
+            <label><input type="radio" name="time" value="Morning"> Morning</label>
+            <label><input type="radio" name="time" value="Noon"> Noon</label>
+            <label><input type="radio" name="time" value="Evening"> Evening</label>
+        </div>
+
+        <!-- تفضيل الفجوات -->
+        <div class="preference-group">
+            <h3>Gap Preference</h3>
+            <label><input type="radio" name="gap" value="1"> Maximum 1hr</label>
+            <label><input type="radio" name="gap" value="2"> Maximum 2hr</label>
+            <label><input type="radio" name="gap" value="3"> Maximum 3hr</label>
+        </div>
+
+        <!-- تفضيل أيام العطلة -->
+        <div class="preference-group">
+            <h3>Days Off Preference</h3>
+            <label><input type="radio" name="dayoff" value="1"> One day off</label>
+            <label><input type="radio" name="dayoff" value="2"> Two days off</label>
+            <label><input type="radio" name="dayoff" value="any"> Anything</label>
+        </div>
+
+        <button class="btn-primary" onclick="submitPreferences()">Next</button>
+    </section>
+
+    <!-- تذييل الصفحة -->
+    <footer class="footer">
+        <div class="socials">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <p>© 2023 Smart Schedule. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/app.js"></script>
+</body>
+</html>

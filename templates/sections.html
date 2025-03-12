@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Schedule - Smart Schedule</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
+</head>
+<body>
+
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="logo">Smart Schedule</div>
+        <ul class="nav-links">
+            <li><a href="index#features">Features</a></li>
+            <li><a href="index#objectives">Objectives</a></li>
+            <li><a href="subjects" class="btn">Get Started</a></li>
+            <li><a href="#">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- جدول تحديد المواعيد -->
+    <section class="schedule-section">
+        <h1 id="subject-title">Input sections for Subject</h1>
+
+        <table id="schedule-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Sunday</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                </tr>
+            </thead>
+            <tbody id="schedule-body"></tbody>
+        </table>
+
+        <button class="btn-primary" id="next-btn" onclick="nextSubject()">Next Subject</button>
+    </section>
+
+    <!-- تذييل الصفحة -->
+    <footer class="footer">
+        <div class="socials">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <p>© 2023 Smart Schedule. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Subjects - Smart Schedule</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+    <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
+</head>
+<body>
+
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="logo">Smart Schedule</div>
+        <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#objectives">Objectives</a></li>
+            <li><a href="subjects.html" class="btn">Get Started</a></li>
+            <li><a href="#">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- نموذج إدخال المواد -->
+    <section class="form-section">
+        <h1>Get Started with Smart Schedule</h1>
+        <p>Enter your subject preferences</p>
+
+        <label for="subjectCount">Number of Subjects:</label>
+        <input type="number" id="subjectCount" value="2" min="1" max="10" onchange="generateSubjectInputs()">
+
+        <div id="subjects-container"></div>
+
+        <button class="btn-primary" onclick="submitSubjects()">Submit Subjects</button>
+    </section>
+
+    <!-- تذييل الصفحة -->
+    <footer class="footer">
+        <div class="socials">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <p>© 2023 Smart Schedule. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/app.js"></script>
+</body>
+</html>
