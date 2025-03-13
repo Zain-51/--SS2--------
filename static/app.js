@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ======================================================
-// ✅ وظائف عامة (General Functions)
+// ✅ وظائف عاااامة (General Functions)
 // ======================================================
 function getSubjects() {
     return JSON.parse(localStorage.getItem("subjects")) || [];
