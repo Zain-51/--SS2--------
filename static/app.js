@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (darkModeToggle) {
         darkModeToggle.addEventListener('click', toggleDarkMode);
     }
-     //Repo Test
+     //Repo Test2
     // تحميل البيانات بناءً على الصفحة الحالية
     const currentPage = window.location.pathname.split("/").pop();
     switch (currentPage) {
