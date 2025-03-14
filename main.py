@@ -37,15 +37,37 @@ def generate_timetable():
     days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]
     times = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"]
 
+    # Detect conflicts
+    conflicts = []
+    subject_list = list(schedules.keys())
+    for i in range(len(subject_list)):
+        for j in range(i + 1, len(subject_list)):
+            subject_a = subject_list[i]
+            subject_b = subject_list[j]
+            slots_a = schedules[subject_a]
+            slots_b = schedules[subject_b]
+
+            # Check for overlapping slots
+            overlapping_slots = [slot_a for slot_a in slots_a for slot_b in slots_b if slot_a["day"] == slot_b["day"] and slot_a["time"] == slot_b["time"]]
+
+            if overlapping_slots:
+                conflicts.append({
+                    "subjectA": subject_a,
+                    "subjectB": subject_b,
+                    "overlappingSlots": overlapping_slots
+                })
+
     # Generate timetable data using user inputs
     timetable_data = {
         "days": days,
         "times": times,
         "subjects": subjects,
-        "schedules": schedules
+        "schedules": schedules,
+        "conflicts": conflicts
     }
 
     return jsonify(timetable_data)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

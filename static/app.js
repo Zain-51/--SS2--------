@@ -179,7 +179,39 @@ function submitPreferences() {
         alert("⚠️ Please select all preferences before proceeding.");
     }
 }
+// ======================================================
+//               دالة كشف التعارضات 
+// ======================================================
 
+function detectConflicts(schedules) {
+    const conflicts = [];
+    const subjects = Object.keys(schedules);
+
+    // Compare each subject's slots with every other subject's slots
+    for (let i = 0; i < subjects.length; i++) {
+        for (let j = i + 1; j < subjects.length; j++) {
+            const subjectA = subjects[i];
+            const subjectB = subjects[j];
+            const slotsA = schedules[subjectA];
+            const slotsB = schedules[subjectB];
+
+            // Check for overlapping slots
+            const overlappingSlots = slotsA.filter(slotA =>
+                slotsB.some(slotB => slotA.day === slotB.day && slotA.time === slotB.time)
+            );
+
+            if (overlappingSlots.length > 0) {
+                conflicts.push({
+                    subjectA,
+                    subjectB,
+                    overlappingSlots
+                });
+            }
+        }
+    }
+
+    return conflicts;
+}
 // ======================================================
 // 🚀 4️⃣ صفحة الجداول النهائية (timetables.html)
 // ======================================================
@@ -190,64 +222,80 @@ async function generateTimetables() {
     try {
         // Fetch timetable data from the backend
         const data = await sendUserData();
-
         const { days, times, subjects, schedules } = data;
 
-        // Create a single timetable
-        const timetable = document.createElement("div");
-        timetable.classList.add("timetable");
-        timetable.id = `timetable-1`;
+        // Detect conflicts
+        const conflicts = detectConflicts(schedules);
 
-        timetable.innerHTML = `<h3>📊 Your Timetable</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time</th>
-                        ${days.map(day => `<th>${day}</th>`).join('')}
-                    </tr>
-                </thead>
-                <tbody>
-                    ${times.map(time => `
-                        <tr>
-                            <td>${time}</td>
-                            ${days.map(day => `<td data-day="${day}" data-time="${time}">+</td>`).join('')}
-                        </tr>`).join('')}
-                </tbody>
-            </table>`;
+        if (conflicts.length > 0) {
+            // Display conflict warning
+            alert(`⚠️ Conflicts detected between subjects: ${conflicts.map(c => `${c.subjectA} and ${c.subjectB}`).join(", ")}`);
 
-        container.appendChild(timetable);
+            // Generate alternative timetables for each conflict
+            conflicts.forEach((conflict, index) => {
+                const { subjectA, subjectB } = conflict;
 
-        // Use user schedules to populate the timetable
-        scheduleUserSubjects(timetable, schedules);
+                // Timetable 1: Include subjectA, exclude subjectB
+                const timetable1 = createTimetable(days, times, subjects, schedules, subjectB);
+                timetable1.innerHTML = `<h3>📊 Timetable ${index + 1} (${subjectA} included, ${subjectB} excluded)</h3>` + timetable1.innerHTML;
+                container.appendChild(timetable1);
+
+                // Timetable 2: Include subjectB, exclude subjectA
+                const timetable2 = createTimetable(days, times, subjects, schedules, subjectA);
+                timetable2.innerHTML = `<h3>📊 Timetable ${index + 2} (${subjectB} included, ${subjectA} excluded)</h3>` + timetable2.innerHTML;
+                container.appendChild(timetable2);
+            });
+        } else {
+            // No conflicts, generate a single timetable
+            const timetable = createTimetable(days, times, subjects, schedules);
+            timetable.innerHTML = `<h3>📊 Your Timetable</h3>` + timetable.innerHTML;
+            container.appendChild(timetable);
+        }
     } catch (error) {
         console.error("Failed to fetch timetable data:", error);
     }
 }
 
+function createTimetable(days, times, subjects, schedules, excludeSubject = null) {
+    const timetable = document.createElement("div");
+    timetable.classList.add("timetable");
 
+    timetable.innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    ${days.map(day => `<th>${day}</th>`).join('')}
+                </tr>
+            </thead>
+            <tbody>
+                ${times.map(time => `
+                    <tr>
+                        <td>${time}</td>
+                        ${days.map(day => `<td data-day="${day}" data-time="${time}">+</td>`).join('')}
+                    </tr>`).join('')}
+            </tbody>
+        </table>`;
 
-function scheduleUserSubjects(timetable, schedules) {
+    // Populate the timetable with user schedules
+    scheduleUserSubjects(timetable, schedules, excludeSubject);
+
+    return timetable;
+}
+
+function scheduleUserSubjects(timetable, schedules, excludeSubject = null) {
     const cells = timetable.querySelectorAll("td[data-day][data-time]");
 
-    console.log("Schedules from localStorage:", schedules); // Debug: Check the schedules data
-
-    // Iterate over each subject and its scheduled times
     Object.entries(schedules).forEach(([subject, slots]) => {
-        console.log(`Processing subject: ${subject}`); // Debug: Check which subject is being processed
-        console.log(`Slots for ${subject}:`, slots); // Debug: Check the slots for the subject
+        if (subject === excludeSubject) return; // Skip the excluded subject
 
         slots.forEach(slot => {
             const { day, time } = slot;
-            console.log(`Looking for cell: ${day} at ${time}`); // Debug: Check which cell is being searched
-
             const cell = timetable.querySelector(`td[data-day="${day}"][data-time="${time}"]`);
 
             if (cell && cell.textContent === "+") {
-                console.log(`Assigning ${subject} to ${day} at ${time}`); // Debug: Confirm assignment
                 cell.textContent = subject;
                 cell.classList.add("scheduled");
-            } else {
-                console.log(`Cell not found or already occupied: ${day} at ${time}`); // Debug: Check why the cell wasn't assigned
             }
         });
     });
