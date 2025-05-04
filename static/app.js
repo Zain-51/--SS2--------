@@ -35,6 +35,14 @@ document.addEventListener("DOMContentLoaded", () => {
         default:
             console.log("Welcome to Smart Schedule!");
     }
+
+     // Add this for section-input.html جديد
+  const sectionCountInput = document.getElementById('section-count');
+  if (sectionCountInput) {
+    sectionCountInput.addEventListener('input', generateSectionInputs);
+    generateSectionInputs(); // Initialize on page load
+  }
+
 });
 
 // ======================================================
@@ -56,6 +64,70 @@ function redirectTo(page, message) {
     alert(message);
     window.location.href = page;
 }
+
+function loadSubject() {
+    const subjects = getSubjects();
+    const subjectIndex = new URLSearchParams(window.location.search).get('subject') || 0;
+    const subjectName = subjects[subjectIndex] || '[No Subject]';
+    document.getElementById('current-subject').textContent = subjectName;
+}
+
+// ======================================================
+// ✅ PAGE INITIALIZATION (DOMContentLoaded)
+// ======================================================
+document.addEventListener("DOMContentLoaded", () => {
+    console.log("🚀 Smart Schedule initialized");
+    
+    // Load current subject name (for sections-input.html)
+    loadSubject();
+    
+    // Initialize dynamic inputs based on current page
+    const currentPage = window.location.pathname.split("/").pop();
+    
+    if (currentPage === "subjects.html" || currentPage === "subjects") {
+        generateSubjectInputs();
+    }
+    else if (currentPage === "sections-input.html" || currentPage === "sections-input") {
+        generateSectionInputs();
+        // Initialize section count input listener
+        const sectionCountInput = document.getElementById('section-count');
+        if (sectionCountInput) {
+            sectionCountInput.addEventListener('input', generateSectionInputs);
+            generateSectionInputs(); // Initial generation
+        }
+    }
+    else if (currentPage === "sections.html" || currentPage === "sections") {
+        if (getSubjects().length > 0) {
+            generateScheduleTable();
+        }
+    }
+    
+    // Initialize dark mode if the toggle exists
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+        applyDarkMode(); // Apply saved mode
+    }
+});
+
+
+// ======================================================
+// 🆕 NEW: Section Input Generation Logic الجديدة حقت sections-input.html
+// ======================================================
+function generateSectionInputs() {
+    const count = document.getElementById('section-count').value;
+    const container = document.getElementById('section-names-container');
+    const currentSubject = document.getElementById('current-subject').textContent;
+    
+    container.innerHTML = '';
+    
+    for (let i = 1; i <= count; i++) {
+      container.innerHTML += `
+        <label>Section ${i}:</label>
+        <input type="text" id="section-${i}" placeholder="e.g., ${currentSubject} ${3300 + i}">
+      `;
+    }
+  }
 
 // ======================================================
 // 🚀 1️⃣ صفحة إدخال المواد (subjects.html)
@@ -88,27 +160,135 @@ function submitSubjects() {
 
     if (subjects.length > 0) {
         localStorage.setItem("subjects", JSON.stringify(subjects));
-        window.location.href = "sections";
+        window.location.href = "sections-input?subject=0"; // Redirect to the first subject's section input page
     } else {
         alert("⚠️ Please enter at least one subject.");
     }
 }
 
 // ======================================================
-// 🚀 2️⃣ صفحة تحديد الجدول الزمني (sections.html)
+// 🚀 SECTIONS-INPUT PAGE (sections-input.html) - FIXED
 // ======================================================
 let currentSubjectIndex = 0;
-let schedules = getSchedules();
 
-function generateScheduleTable() {
+function submitSections() {
+
+    // Debugging: Check if DOM is loaded
+    console.log("Document body:", document.body.innerHTML); // Check if DOM loaded
+    const sectionCountInput = document.getElementById("section-count");
+    if (!sectionCountInput) {
+        console.error("Missing elements:", {
+            'section-count': document.getElementById("section-count"),
+            'current-subject': document.getElementById("current-subject")
+        });
+        return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const subjectIndex = parseInt(params.get("subject")) || 0;
+    const subjects = getSubjects();
+    const currentSubject = subjects[subjectIndex];
+    
+    // 1. Save the current sections
+    const sectionCount = sectionCountInput.value;
+    const sections = {};
+    const allSchedules = getSchedules()
+    Object.assign(allSchedules, sections);
+    localStorage.setItem("schedules", JSON.stringify(allSchedules));
+    
+    for (let i = 1; i <= sectionCount; i++) {
+        const sectionName = document.getElementById(`section-${i}`).value.trim();
+        if (sectionName) {
+            // Store as "Subject - Section" (e.g. "Math - 3301")
+            sections[`${currentSubject} - ${sectionName}`] = []; // Empty slots for now
+        }
+    }
+    
+    // 2. Merge with existing data
+    const allSections = getSchedules();
+    Object.assign(allSections, sections);
+    localStorage.setItem("schedules", JSON.stringify(allSections));
+    
+    // 3. Debug output
+    console.log("Saved sections:", allSections);
+    
+    // 4. Redirect logic
+    if (subjectIndex < subjects.length - 1) {
+        window.location.href = `/sections-input?subject=${subjectIndex + 1}`;
+    } else {
+        window.location.href = "sections";
+    }
+}
+
+// Initialize section inputs
+document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(window.location.search);
+    const subjectIndex = parseInt(params.get("subject")) || 0;
+    const subjects = getSubjects();
+    
+    if (subjects.length > 0) {
+        document.getElementById("current-subject").textContent = subjects[subjectIndex];
+    }
+    
+    // Initialize section count listener
+    const sectionCountInput = document.getElementById("section-count");
+    if (sectionCountInput) {
+        sectionCountInput.addEventListener("input", generateSectionInputs);
+        generateSectionInputs(); // Initial generation
+    }
+});
+
+// ======================================================
+// 🚀 2️⃣ صفحة تحديد الجدول الزمني (sections.html) - UPDATED
+// ======================================================
+let currentSectionIndex = 0;
+let allSections = [];
+
+function initializeSectionPage() {
+    // Load all sections from storage
+    const schedules = getSchedules();
+    allSections = Object.keys(schedules);
+    
+    // Set up event listeners
+    document.getElementById('next-btn').addEventListener('click', nextSection);
+    document.getElementById('prev-btn').addEventListener('click', prevSection);
+    
+    // Initial UI update
+    updateSectionUI();
+}
+
+function updateSectionUI() {
+    if (allSections.length === 0) {
+        console.error("No sections found!");
+        return;
+    }
+    
+    const currentSection = allSections[currentSectionIndex];
+    
+    // Update UI elements
+    document.getElementById('current-section').textContent = currentSection;
+    document.getElementById('current-section-number').textContent = currentSectionIndex + 1;
+    document.getElementById('total-sections').textContent = allSections.length;
+    
+    // Update button states
+    document.getElementById('prev-btn').disabled = currentSectionIndex === 0;
+    document.getElementById('next-btn').textContent = 
+        currentSectionIndex === allSections.length - 1 ? "Finish" : "Next Section";
+    
+    // Generate the schedule table
+    generateScheduleTable(currentSection);
+}
+
+function generateScheduleTable(currentSection) {
     const scheduleBody = document.getElementById("schedule-body");
     if (!scheduleBody) return;
 
-    scheduleBody.innerHTML = ""; // إعادة تعيين الجدول
+    scheduleBody.innerHTML = "";
 
-    const times = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"];
+    const times = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", 
+                  "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"];
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
-    const subjects = getSubjects();
+    const schedules = getSchedules();
 
     times.forEach(time => {
         const row = document.createElement("tr");
@@ -120,6 +300,16 @@ function generateScheduleTable() {
             cell.dataset.day = day;
             cell.dataset.time = time;
 
+            // Check if this slot is already selected
+            const sectionSlots = schedules[currentSection] || [];
+            const isSelected = sectionSlots.some(slot => 
+                slot.day === day && slot.time === time);
+            
+            if (isSelected) {
+                cell.classList.add("selected");
+                cell.textContent = "✔";
+            }
+
             cell.addEventListener("click", () => {
                 cell.classList.toggle("selected");
                 cell.textContent = cell.classList.contains("selected") ? "✔" : "+";
@@ -130,33 +320,54 @@ function generateScheduleTable() {
 
         scheduleBody.appendChild(row);
     });
-
-    document.getElementById("subject-title").textContent = `Input sections for ${subjects[currentSubjectIndex]}`;
 }
 
-function nextSubject() {
+function nextSection() {
     saveCurrentSchedule();
-    const subjects = getSubjects();
-
-    if (currentSubjectIndex < subjects.length - 1) {
-        currentSubjectIndex++;
-        generateScheduleTable();
+    
+    if (currentSectionIndex < allSections.length - 1) {
+        currentSectionIndex++;
+        updateSectionUI();
     } else {
-        localStorage.setItem("schedules", JSON.stringify(schedules)); // Save schedules to localStorage
-        console.log("Final schedules saved to localStorage:", schedules); // Debug: Check final schedules
         window.location.href = "preferences";
+    }
+}
+
+function prevSection() {
+    saveCurrentSchedule();
+    
+    if (currentSectionIndex > 0) {
+        currentSectionIndex--;
+        updateSectionUI();
     }
 }
 
 function saveCurrentSchedule() {
     const selectedCells = document.querySelectorAll(".selected");
-    const currentSubject = getSubjects()[currentSubjectIndex];
+    const currentSection = allSections[currentSectionIndex];
+    const schedules = getSchedules();
 
-    schedules[currentSubject] = Array.from(selectedCells).map(cell => ({
+    schedules[currentSection] = Array.from(selectedCells).map(cell => ({
         day: cell.dataset.day,
         time: cell.dataset.time
     }));
+    
+    localStorage.setItem("schedules", JSON.stringify(schedules));
 }
+
+// Initialize the page
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.location.pathname.includes("sections")) {
+        initializeSectionPage();
+    }
+});
+
+//temprorary debugging code
+document.getElementById('prev-btn').addEventListener('click', (e) => {
+    e.preventDefault(); // Test if this fixes it
+    console.log("Prev clicked"); // Verify this logs
+    prevSection();
+});
 
 // ======================================================
 // 🚀 3️⃣ صفحة التفضيلات (preferences.html)

@@ -9,6 +9,10 @@ def home():
 def subjects():
     return render_template("subjects.html")
 
+@app.route("/sections-input")
+def sections_input():
+    return render_template("sections-input.html")
+
 @app.route("/sections")
 def sections():
     return render_template("sections.html")

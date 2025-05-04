@@ -508,3 +508,45 @@ body.dark-mode {
     color: white;
     transform: scale(1.05);
 }
+
+/* ====================================================== */
+/* 🆕 NEW SECTION STYLES (sections.html) */
+/* ====================================================== */
+
+/* Progress indicator */
+.progress-indicator {
+    text-align: center;
+    margin: 15px 0;
+    font-weight: 600;
+    color: #4b49ac;
+}
+
+/* Section navigation */
+.section-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 25px;
+    gap: 15px;
+}
+
+#current-section {
+    color: #4b49ac;
+    font-weight: 600;
+}
+
+/* Button states */
+#prev-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .section-navigation {
+        flex-direction: column;
+    }
+    
+    .section-navigation button {
+        width: 100%;
+    }
+}

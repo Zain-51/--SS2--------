@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Set Schedule - Smart Schedule</title>
     <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
-    <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
+    
 </head>
-<body>
 
-    <!-- شريط التنقل -->
+<body>
     <nav class="navbar">
         <div class="logo">Smart Schedule</div>
         <ul class="nav-links">
@@ -20,9 +19,11 @@
         </ul>
     </nav>
 
-    <!-- جدول تحديد المواعيد -->
     <section class="schedule-section">
-        <h1 id="subject-title">Input sections for Subject</h1>
+        <h1 id="subject-title">Input time slots for <span id="current-section"></span></h1>
+        <div class="progress-indicator" id="progress-indicator">
+            Section <span id="current-section-number">1</span> of <span id="total-sections">X</span>
+        </div>
 
         <table id="schedule-table">
             <thead>
@@ -38,19 +39,21 @@
             <tbody id="schedule-body"></tbody>
         </table>
 
-        <button class="btn-primary" id="next-btn" onclick="nextSubject()">Next Subject</button>
+        <div class="section-navigation">
+            <button class="btn-secondary" id="prev-btn" type="button">Previous Section</button>
+            <button class="btn-primary" id="next-btn" type="button" onclick="submitSections()">Next Section</button>
+        </div>
+        <input type="number" id="section-count" min="1" max="10">
     </section>
 
-    <!-- تذييل الصفحة -->
     <footer class="footer">
-        <div class="socials">
+        <div class="socials">  
             <a href="#">Facebook</a>
             <a href="#">Twitter</a>
             <a href="#">GitHub</a>
         </div>
         <p>© 2025 Smart Schedule. All rights reserved.</p>
-    </footer>
-
-    <script src="scripts/app.js"></script>
+    </footer>''
+    <script type="text/javascript" src="{{url_for('static', filename='app.js')}}"></script>
 </body>
 </html>

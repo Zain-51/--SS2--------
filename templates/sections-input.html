@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Sections - Smart Schedule</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='main.css')}}">
+</head>
+<body>
+    <!-- Navigation Bar (Same as subjects.html) -->
+    <nav class="navbar">
+        <div class="logo">Smart Schedule</div>
+        <ul class="nav-links">
+            <li><a href="index.html#features">Features</a></li>
+            <li><a href="index.html#objectives">Objectives</a></li>
+            <li><a href="subjects.html" class="btn">Get Started</a></li>
+            <li><a href="#">Register</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Form Section -->
+    <section class="form-section">
+        <h1>Enter Sections for <span id="current-subject">[Subject]</span></h1>
+        
+        <!-- Number of Sections Input -->
+        <label>Number of Sections:</label>
+    <input type="number" id="section-count" min="1" max="10" value="1" onchange="generateSectionInputs()">
+    
+    <div id="section-names-container">
+        <!-- Dynamic inputs will appear here -->
+        <label>Section 1:</label>
+        <input type="text" id="section-1" placeholder="e.g., [Subject] 101">
+    </div>
+
+    <button class="btn-primary" onclick="submitSections()">Next</button>
+</section>
+
+    <!-- Footer (Same as subjects.html) -->
+    <footer class="footer">
+        <div class="socials">
+            <a href="#">Facebook</a>
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+        </div>
+        <p>© 2025 Smart Schedule. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript will be added later -->
+    <script src="{{url_for('static', filename='app.js')}}"></script>
+</body>
+</html>
