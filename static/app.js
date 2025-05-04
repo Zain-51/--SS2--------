@@ -171,52 +171,31 @@ function submitSubjects() {
 // ======================================================
 let currentSubjectIndex = 0;
 
-function submitSections() {
-
-    // Debugging: Check if DOM is loaded
-    console.log("Document body:", document.body.innerHTML); // Check if DOM loaded
-    const sectionCountInput = document.getElementById("section-count");
-    if (!sectionCountInput) {
-        console.error("Missing elements:", {
-            'section-count': document.getElementById("section-count"),
-            'current-subject': document.getElementById("current-subject")
-        });
-        return;
-    }
-
+function saveSectionNames() {
+    const sectionCount = document.getElementById("section-count").value;
+    const sections = {};
+    const subjects = getSubjects();
     const params = new URLSearchParams(window.location.search);
     const subjectIndex = parseInt(params.get("subject")) || 0;
-    const subjects = getSubjects();
     const currentSubject = subjects[subjectIndex];
-    
-    // 1. Save the current sections
-    const sectionCount = sectionCountInput.value;
-    const sections = {};
-    const allSchedules = getSchedules()
-    Object.assign(allSchedules, sections);
-    localStorage.setItem("schedules", JSON.stringify(allSchedules));
-    
+
     for (let i = 1; i <= sectionCount; i++) {
         const sectionName = document.getElementById(`section-${i}`).value.trim();
         if (sectionName) {
-            // Store as "Subject - Section" (e.g. "Math - 3301")
-            sections[`${currentSubject} - ${sectionName}`] = []; // Empty slots for now
+            sections[`${currentSubject} - ${sectionName}`] = []; // Initialize empty time slots
         }
     }
-    
-    // 2. Merge with existing data
-    const allSections = getSchedules();
-    Object.assign(allSections, sections);
-    localStorage.setItem("schedules", JSON.stringify(allSections));
-    
-    // 3. Debug output
-    console.log("Saved sections:", allSections);
-    
-    // 4. Redirect logic
+
+    // Save to localStorage
+    const allSchedules = getSchedules();
+    Object.assign(allSchedules, sections);
+    localStorage.setItem("schedules", JSON.stringify(allSchedules));
+
+    // Redirect logic
     if (subjectIndex < subjects.length - 1) {
-        window.location.href = `/sections-input?subject=${subjectIndex + 1}`;
+        window.location.href = `sections-input?subject=${subjectIndex + 1}`;
     } else {
-        window.location.href = "sections";
+        window.location.href = "sections"; // Proceed to time slot input
     }
 }
 
@@ -237,6 +216,31 @@ document.addEventListener("DOMContentLoaded", () => {
         generateSectionInputs(); // Initial generation
     }
 });
+
+// ======================================================
+// ✅ sections.html: Save TIME SLOTS for the current section
+// ======================================================
+function saveTimeSlots() {
+    const selectedCells = document.querySelectorAll(".selected");
+    const currentSection = allSections[currentSectionIndex];
+    const schedules = getSchedules();
+
+    // Save selected time slots
+    schedules[currentSection] = Array.from(selectedCells).map(cell => ({
+        day: cell.dataset.day,
+        time: cell.dataset.time
+    }));
+
+    localStorage.setItem("schedules", JSON.stringify(schedules));
+
+    // Navigate to next section or finish
+    if (currentSectionIndex < allSections.length - 1) {
+        currentSectionIndex++;
+        updateSectionUI(); // Refresh the table for the next section
+    } else {
+        window.location.href = "preferences"; // Proceed to preferences
+    }
+}
 
 // ======================================================
 // 🚀 2️⃣ صفحة تحديد الجدول الزمني (sections.html) - UPDATED
