@@ -402,80 +402,125 @@ function detectConflicts(schedules) {
     const conflicts = [];
     const subjects = Object.keys(schedules);
 
-    // Compare each subject's slots with every other subject's slots
-    for (let i = 0; i < subjects.length; i++) {
-        for (let j = i + 1; j < subjects.length; j++) {
-            const subjectA = subjects[i];
-            const subjectB = subjects[j];
-            const slotsA = schedules[subjectA];
-            const slotsB = schedules[subjectB];
+    // Group sections by subject (e.g., "MATH" -> ["MATH-202", "MATH-203"])
+    const subjectGroups = {};
+    subjects.forEach(section => {
+        const subject = section.split(' - ')[0]; // Extract base subject (e.g., "MATH")
+        if (!subjectGroups[subject]) subjectGroups[subject] = [];
+        subjectGroups[subject].push(section);
+    });
 
-            // Check for overlapping slots
-            const overlappingSlots = slotsA.filter(slotA =>
-                slotsB.some(slotB => slotA.day === slotB.day && slotA.time === slotB.time)
-            );
+    // Check for conflicts:
+    // 1. Between sections of the SAME subject (mutually exclusive)
+    // 2. Between sections of DIFFERENT subjects (time overlap)
+    for (const [subject, sections] of Object.entries(subjectGroups)) {
+        // Conflict type 1: Same subject, multiple sections
+        if (sections.length > 1) {
+            conflicts.push({
+                type: "SAME_SUBJECT",
+                subject,
+                sections
+            });
+        }
 
-            if (overlappingSlots.length > 0) {
-                conflicts.push({
-                    subjectA,
-                    subjectB,
-                    overlappingSlots
-                });
+        // Conflict type 2: Time overlaps with other subjects
+        for (let i = 0; i < sections.length; i++) {
+            for (let j = i + 1; j < subjects.length; j++) {
+                const sectionA = sections[i];
+                const sectionB = subjects[j];
+                const baseSubjectB = sectionB.split(' - ')[0];
+
+                // Skip if both sections are from the same subject (already handled above)
+                if (subject === baseSubjectB) continue;
+
+                const slotsA = schedules[sectionA];
+                const slotsB = schedules[sectionB];
+                const overlappingSlots = slotsA.filter(slotA =>
+                    slotsB.some(slotB => slotA.day === slotB.day && slotA.time === slotB.time)
+                );
+
+                if (overlappingSlots.length > 0) {
+                    conflicts.push({
+                        type: "TIME_CLASH",
+                        sectionA,
+                        sectionB,
+                        overlappingSlots
+                    });
+                }
             }
         }
     }
 
     return conflicts;
 }
+
 // ======================================================
 // 🚀 4️⃣ صفحة الجداول النهائية (timetables.html)
 // ======================================================
-async function generateTimetables() {
+function generateTimetables() {
     const container = document.getElementById("timetables-container");
     if (!container) return;
 
-    try {
-        // Fetch timetable data from the backend
-        const data = await sendUserData();
-        const { days, times, subjects, schedules } = data;
+    const schedules = getSchedules();
+    const conflicts = detectConflicts(schedules);
 
-        // Detect conflicts
-        const conflicts = detectConflicts(schedules);
+    // Group sections by subject (e.g., "MATH" -> ["MATH-202", "MATH-203"])
+    const subjectGroups = {};
+    Object.keys(schedules).forEach(section => {
+        const subject = section.split(' - ')[0];
+        if (!subjectGroups[subject]) subjectGroups[subject] = [];
+        subjectGroups[subject].push(section);
+    });
 
-        if (conflicts.length > 0) {
-            // Display conflict warning
-            alert(`⚠️ Conflicts detected between subjects: ${conflicts.map(c => `${c.subjectA} and ${c.subjectB}`).join(", ")}`);
+    // Generate one timetable per valid section combination
+    const validCombinations = generateValidCombinations(subjectGroups);
+    container.innerHTML = '';
 
-            // Generate alternative timetables for each conflict
-            conflicts.forEach((conflict, index) => {
-                const { subjectA, subjectB } = conflict;
-
-                // Timetable 1: Include subjectA, exclude subjectB
-                const timetable1 = createTimetable(days, times, subjects, schedules, subjectB);
-                timetable1.innerHTML = `<h3>📊 Timetable ${index + 1} (${subjectA} included, ${subjectB} excluded)</h3>` + timetable1.innerHTML;
-                container.appendChild(timetable1);
-
-                // Timetable 2: Include subjectB, exclude subjectA
-                const timetable2 = createTimetable(days, times, subjects, schedules, subjectA);
-                timetable2.innerHTML = `<h3>📊 Timetable ${index + 2} (${subjectB} included, ${subjectA} excluded)</h3>` + timetable2.innerHTML;
-                container.appendChild(timetable2);
-            });
-        } else {
-            // No conflicts, generate a single timetable
-            const timetable = createTimetable(days, times, subjects, schedules);
-            timetable.innerHTML = `<h3>📊 Your Timetable</h3>` + timetable.innerHTML;
-            container.appendChild(timetable);
-        }
-    } catch (error) {
-        console.error("Failed to fetch timetable data:", error);
+    if (validCombinations.length === 0) {
+        container.innerHTML = '<p>⚠️ No valid timetables found. Adjust your sections or time slots.</p>';
+        return;
     }
+
+    validCombinations.forEach((combination, index) => {
+        const timetable = createTimetable(combination, schedules);
+        timetable.innerHTML = `<h3>📅 Timetable Option ${index + 1}</h3>` + timetable.innerHTML;
+        container.appendChild(timetable);
+    });
 }
 
-function createTimetable(days, times, subjects, schedules, excludeSubject = null) {
+// Helper: Generate all combinations where only one section per subject is included
+function generateValidCombinations(subjectGroups) {
+    const subjects = Object.keys(subjectGroups);
+    const combinations = [];
+
+    // Recursive function to build combinations
+    function buildCombination(current, index) {
+        if (index === subjects.length) {
+            combinations.push(current);
+            return;
+        }
+
+        const subject = subjects[index];
+        const sections = subjectGroups[subject];
+
+        for (const section of sections) {
+            buildCombination([...current, section], index + 1);
+        }
+    }
+
+    buildCombination([], 0);
+    return combinations;
+}
+
+function createTimetable(sections, schedules) {
     const timetable = document.createElement("div");
     timetable.classList.add("timetable");
 
-    timetable.innerHTML = `
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+    const times = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", 
+                  "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"];
+
+    let tableHTML = `
         <table>
             <thead>
                 <tr>
@@ -483,18 +528,32 @@ function createTimetable(days, times, subjects, schedules, excludeSubject = null
                     ${days.map(day => `<th>${day}</th>`).join('')}
                 </tr>
             </thead>
-            <tbody>
-                ${times.map(time => `
-                    <tr>
-                        <td>${time}</td>
-                        ${days.map(day => `<td data-day="${day}" data-time="${time}">+</td>`).join('')}
-                    </tr>`).join('')}
-            </tbody>
-        </table>`;
+            <tbody>`;
 
-    // Populate the timetable with user schedules
-    scheduleUserSubjects(timetable, schedules, excludeSubject);
+    times.forEach(time => {
+        tableHTML += `<tr><td>${time}</td>`;
+        days.forEach(day => {
+            let cellContent = "+";
+            let cellClass = "";
 
+            // Check if any section in this combination uses the slot
+            for (const section of sections) {
+                const slots = schedules[section] || [];
+                const isUsed = slots.some(slot => slot.day === day && slot.time === time);
+                if (isUsed) {
+                    cellContent = section.split(' - ')[1]; // Show section code (e.g., "202")
+                    cellClass = "scheduled";
+                    break;
+                }
+            }
+
+            tableHTML += `<td class="${cellClass}" data-day="${day}" data-time="${time}">${cellContent}</td>`;
+        });
+        tableHTML += `</tr>`;
+    });
+
+    tableHTML += `</tbody></table>`;
+    timetable.innerHTML = tableHTML;
     return timetable;
 }
 
