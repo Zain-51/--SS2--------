@@ -394,6 +394,46 @@ function submitPreferences() {
         alert("⚠️ Please select all preferences before proceeding.");
     }
 }
+
+// ======================================================
+// 🚀 3️⃣ كود تشغيل التفضيلات (preferences.html)
+// ======================================================
+
+function scoreTimetable(timetable, timePreference) {
+    let score = 0;
+    const timeSlots = {
+        "8:00 AM": 0, "9:00 AM": 0, "10:00 AM": 0, "11:00 AM": 0, "12:00 PM": 0, // Morning
+        "1:00 PM": 1, "2:00 PM": 1, "3:00 PM": 1, // Noon
+        "4:00 PM": 2, "5:00 PM": 2 // Evening
+    };
+
+    // Count classes in each time period
+    const periodCounts = [0, 0, 0]; // Morning, Noon, Evening
+    
+    timetable.querySelectorAll('.scheduled').forEach(cell => {
+        const time = cell.dataset.time;
+        const period = timeSlots[time] !== undefined ? timeSlots[time] : 1;
+        periodCounts[period]++;
+    });
+
+    // Calculate score based on preference
+    switch(timePreference) {
+        case "Morning":
+            score = periodCounts[0] * 3 + periodCounts[1] * 1 + periodCounts[2] * 0;
+            break;
+        case "Noon":
+            score = periodCounts[0] * 1 + periodCounts[1] * 3 + periodCounts[2] * 1;
+            break;
+        case "Evening":
+            score = periodCounts[0] * 0 + periodCounts[1] * 1 + periodCounts[2] * 3;
+            break;
+        default:
+            score = periodCounts[0] + periodCounts[1] + periodCounts[2];
+    }
+    
+    return score;
+}
+
 // ======================================================
 //               دالة كشف التعارضات 
 // ======================================================
@@ -462,6 +502,7 @@ function generateTimetables() {
     if (!container) return;
 
     const schedules = getSchedules();
+    const preferences = getPreferences(); //preferences
     const conflicts = detectConflicts(schedules);
 
     // Group sections by subject (e.g., "MATH" -> ["MATH-202", "MATH-203"])
@@ -481,8 +522,25 @@ function generateTimetables() {
         return;
     }
 
-    validCombinations.forEach((combination, index) => {
-        const timetable = createTimetable(combination, schedules);
+    //لين هنا الدالة القديمة
+    //هنا تبدأ الاضافة الجديدة
+
+    // CREATE ALL TIMETABLES FIRST
+    const timetables = validCombinations.map(combination => {
+        return createTimetable(combination, schedules);
+    });
+
+    // SORT BASED ON PREFERENCES IF THEY EXIST
+    if (preferences && preferences.time) {
+        timetables.sort((a, b) => {
+            const scoreA = scoreTimetable(a, preferences.time);
+            const scoreB = scoreTimetable(b, preferences.time);
+            return scoreB - scoreA; // Higher scores first
+        });
+    }
+
+    // DISPLAY SORTED TIMETABLES
+    timetables.forEach((timetable, index) => {
         timetable.innerHTML = `<h3>📅 Timetable Option ${index + 1}</h3>` + timetable.innerHTML;
         container.appendChild(timetable);
     });
@@ -590,13 +648,14 @@ function saveCurrentSchedule() {
 async function sendUserData() {
     const subjects = JSON.parse(localStorage.getItem("subjects")) || [];
     const schedules = JSON.parse(localStorage.getItem("schedules")) || {};
+    const preferences = JSON.parse(localStorage.getItem("preferences")) || {};  //preferences
 
     const response = await fetch('/generate-timetable', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ subjects, schedules }),
+        body: JSON.stringify({ subjects, schedules, preferences }), //Include preferences
     });
 
     const data = await response.json();

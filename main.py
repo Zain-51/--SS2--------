@@ -37,6 +37,7 @@ def generate_timetable():
     user_data = request.get_json()
     subjects = user_data.get("subjects", [])
     schedules = user_data.get("schedules", {})
+    preferences = user_data.get("preferences", {})  # Add preferences to the request
 
     days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"]
     times = ["8:00 AM", "9:00 AM", "10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM"]
@@ -67,7 +68,8 @@ def generate_timetable():
         "times": times,
         "subjects": subjects,
         "schedules": schedules,
-        "conflicts": conflicts
+        "conflicts": conflicts,
+        "preferences": preferences  # Include preferences in response
     }
 
     return jsonify(timetable_data)
